@@ -1,0 +1,37 @@
+# Python 3.11.0 Compatible Requirements
+# Flask Plant Disease Detection System
+
+# Flask Web Framework
+Flask==3.0.2
+Flask-SQLAlchemy==3.1.1
+Werkzeug==3.0.1
+
+# Database
+SQLAlchemy==2.0.28
+
+# Image Processing
+Pillow==10.3.0
+
+# Machine Learning - TensorFlow 2.15 is the recommended version for Python 3.11
+tensorflow==2.15.0
+# Or for CPU-only (smaller, faster install):
+# tensorflow-cpu==2.15.0
+
+# Numerical Computing (pinned for TensorFlow 2.15 compatibility)
+numpy==1.26.4
+
+# Protobuf (required for TensorFlow, must be <5.0 for compatibility)
+protobuf==4.25.3
+
+# Environment Variables
+python-dotenv==1.0.1
+
+# OpenAI GPT Integration
+openai==1.40.0
+httpx==0.27.0
+
+# WSGI Servers for Production (Optional)
+# For Linux/Mac:
+gunicorn==22.0.0
+# For Windows:
+waitress==3.0.0

@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+{% block title %}Prediction History - AgriVision AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="text-center mb-5">
+        <i class="fas fa-clock-rotate-left display-4 text-success mb-3"></i>
+        <h2 class="fw-bold">Prediction History</h2>
+        <p class="text-muted">View all your previous disease detection results</p>
+        {% if use_local_storage %}
+        <div class="alert alert-info alert-dismissible fade show mt-3" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Local Storage Mode:</strong> Predictions are stored locally on this device
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Content Container -->
+    <div id="historyContent">
+        <!-- Will be populated by JavaScript if using local storage, or shown by Flask if using DB -->
+        {% if predictions and not use_local_storage %}
+            <!-- Database predictions display -->
+            {{ render_predictions(predictions) }}
+        {% endif %}
+    </div>
+</div>
+
+<!-- Macro for rendering predictions -->
+{% macro render_predictions(predictions) %}
+    {% if predictions %}
+        <!-- Statistics Cards -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-list-check fa-2x text-success mb-3"></i>
+                        <h3 class="fw-bold mb-1" id="totalCount">{{ predictions|length }}</h3>
+                        <p class="text-muted mb-0">Total Analyses</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-calendar-day fa-2x text-success mb-3"></i>
+                        <h3 class="fw-bold mb-1" id="latestDate">
+                            {% if predictions %}{{ predictions[0].created_at.strftime('%b %d') }}{% endif %}
+                        </h3>
+                        <p class="text-muted mb-0">Latest Analysis</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-percentage fa-2x text-success mb-3"></i>
+                        <h3 class="fw-bold mb-1" id="avgConfidence">
+                            {% if predictions %}{{ "%.1f"|format(predictions|sum(attribute='confidence')/predictions|length) }}{% endif %}%
+                        </h3>
+                        <p class="text-muted mb-0">Avg Confidence</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Table -->
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-success text-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table me-2"></i>Analysis Records
+                    </h5>
+                    <button class="btn btn-danger btn-sm" onclick="clearHistory()" title="Clear all history">
+                        <i class="fas fa-trash me-1"></i>Clear All
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="predictionsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="text-center" style="width: 80px;">
+                                    <i class="fas fa-hashtag"></i>
+                                </th>
+                                <th scope="col" style="width: 120px;">
+                                    <i class="fas fa-image me-2"></i>Image
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-disease me-2"></i>Disease Detected
+                                </th>
+                                <th scope="col" style="width: 150px;">
+                                    <i class="fas fa-chart-line me-2"></i>Confidence
+                                </th>
+                                <th scope="col" style="width: 180px;">
+                                    <i class="fas fa-clock me-2"></i>Date & Time
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="predictionsBody">
+                            {% for prediction in predictions %}
+                            <tr>
+                                <td class="text-center align-middle">
+                                    <span class="badge bg-secondary">{{ loop.index }}</span>
+                                </td>
+                                <td class="align-middle">
+                                    <img src="{{ url_for('static', filename='uploads/' + prediction.image_name) }}" 
+                                         alt="Plant" 
+                                         class="img-thumbnail" 
+                                         style="width: 80px; height: 80px; object-fit: cover;">
+                                </td>
+                                <td class="align-middle">
+                                    <span class="fw-bold">
+                                        {% if 'Healthy' in prediction.predicted_class %}
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                        {% else %}
+                                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                        {% endif %}
+                                        {{ prediction.predicted_class }}
+                                    </span>
+                                </td>
+                                <td class="align-middle">
+                                    <div class="progress" style="height: 25px;">
+                                        <div class="progress-bar 
+                                            {% if prediction.confidence >= 90 %}bg-success
+                                            {% elif prediction.confidence >= 75 %}bg-info
+                                            {% elif prediction.confidence >= 60 %}bg-warning
+                                            {% else %}bg-danger
+                                            {% endif %}" 
+                                             role="progressbar" 
+                                             style="width: {{ prediction.confidence }}%"
+                                             aria-valuenow="{{ prediction.confidence }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                            <small class="fw-bold">{{ prediction.confidence }}%</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="align-middle">
+                                    <small class="text-muted">
+                                        <i class="far fa-calendar me-1"></i>
+                                        {{ prediction.created_at.strftime('%Y-%m-%d') }}<br>
+                                        <i class="far fa-clock me-1"></i>
+                                        {{ prediction.created_at.strftime('%H:%M:%S') }}
+                                    </small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-light text-muted text-center py-3">
+                <small>
+                    <i class="fas fa-info-circle me-2"></i>
+                    Showing <span id="recordCount">{{ predictions|length }}</span> prediction(s)
+                </small>
+            </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="text-center mt-4">
+            <a href="{{ url_for('upload') }}" class="btn btn-success btn-lg px-5">
+                <i class="fas fa-plus-circle me-2"></i>New Analysis
+            </a>
+        </div>
+
+    {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body py-5">
+                    <i class="fas fa-inbox fa-4x text-muted mb-4"></i>
+                    <h4 class="fw-bold mb-3">No Predictions Yet</h4>
+                    <p class="text-muted mb-4">
+                        You haven't analyzed any plant images yet. 
+                        Start by uploading your first image.
+                    </p>
+                    <a href="{{ url_for('upload') }}" class="btn btn-success btn-lg px-5">
+                        <i class="fas fa-upload me-2"></i>Upload Your First Image
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endmacro %}
+
+<script>
+// Local Storage Management for Predictions
+const STORAGE_KEY = 'plantDiseaseHistory';
+
+function loadLocalStorageHistory() {
+    const predictions = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    return predictions.sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+function saveToLocalStorage(prediction) {
+    const predictions = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    predictions.unshift(prediction);
+    // Keep only last 100 predictions
+    if (predictions.length > 100) predictions.pop();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(predictions));
+}
+
+function clearHistory() {
+    if (confirm('Are you sure you want to clear all prediction history?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+    }
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleString();
+}
+
+function renderLocalStoragePredictions() {
+    const predictions = loadLocalStorageHistory();
+    const container = document.getElementById('historyContent');
+    
+    if (predictions.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-5">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body py-5">
+                        <i class="fas fa-inbox fa-4x text-muted mb-4"></i>
+                        <h4 class="fw-bold mb-3">No Predictions Yet</h4>
+                        <p class="text-muted mb-4">
+                            You haven't analyzed any plant images yet. 
+                            Start by uploading your first image.
+                        </p>
+                        <a href="/upload" class="btn btn-success btn-lg px-5">
+                            <i class="fas fa-upload me-2"></i>Upload Your First Image
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    const avgConfidence = (predictions.reduce((sum, p) => sum + p.confidence, 0) / predictions.length).toFixed(1);
+    
+    let tableRows = predictions.map((pred, index) => `
+        <tr>
+            <td class="text-center align-middle">
+                <span class="badge bg-secondary">${index + 1}</span>
+            </td>
+            <td class="align-middle">
+                <div style="width: 80px; height: 80px; background: #e9ecef; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+                    <i class="fas fa-leaf text-success"></i>
+                </div>
+            </td>
+            <td class="align-middle">
+                <span class="fw-bold">
+                    ${pred.disease_name.includes('Healthy') ? '<i class="fas fa-check-circle text-success me-2"></i>' : '<i class="fas fa-exclamation-triangle text-warning me-2"></i>'}
+                    ${pred.disease_name}
+                </span>
+            </td>
+            <td class="align-middle">
+                <div class="progress" style="height: 25px;">
+                    <div class="progress-bar ${pred.confidence >= 90 ? 'bg-success' : pred.confidence >= 75 ? 'bg-info' : pred.confidence >= 60 ? 'bg-warning' : 'bg-danger'}" 
+                         role="progressbar" 
+                         style="width: ${pred.confidence}%"
+                         aria-valuenow="${pred.confidence}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                        <small class="fw-bold">${pred.confidence}%</small>
+                    </div>
+                </div>
+            </td>
+            <td class="align-middle">
+                <small class="text-muted">${formatDate(pred.date)}</small>
+            </td>
+        </tr>
+    `).join('');
+
+    container.innerHTML = `
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-list-check fa-2x text-success mb-3"></i>
+                        <h3 class="fw-bold mb-1">${predictions.length}</h3>
+                        <p class="text-muted mb-0">Total Analyses</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-calendar-day fa-2x text-success mb-3"></i>
+                        <h3 class="fw-bold mb-1">${formatDate(predictions[0].date).split(',')[0]}</h3>
+                        <p class="text-muted mb-0">Latest Analysis</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-percentage fa-2x text-success mb-3"></i>
+                        <h3 class="fw-bold mb-1">${avgConfidence}%</h3>
+                        <p class="text-muted mb-0">Avg Confidence</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-success text-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table me-2"></i>Analysis Records
+                    </h5>
+                    <button class="btn btn-danger btn-sm" onclick="clearHistory()" title="Clear all history">
+                        <i class="fas fa-trash me-1"></i>Clear All
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="text-center" style="width: 80px;"><i class="fas fa-hashtag"></i></th>
+                                <th scope="col" style="width: 120px;"><i class="fas fa-image me-2"></i>Image</th>
+                                <th scope="col"><i class="fas fa-disease me-2"></i>Disease Detected</th>
+                                <th scope="col" style="width: 150px;"><i class="fas fa-chart-line me-2"></i>Confidence</th>
+                                <th scope="col" style="width: 180px;"><i class="fas fa-clock me-2"></i>Date & Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-light text-muted text-center py-3">
+                <small><i class="fas fa-info-circle me-2"></i>Showing ${predictions.length} prediction(s)</small>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/upload" class="btn btn-success btn-lg px-5">
+                <i class="fas fa-plus-circle me-2"></i>New Analysis
+            </a>
+        </div>
+    `;
+}
+
+// Load local storage history on page load if enabled
+document.addEventListener('DOMContentLoaded', function() {
+    {% if use_local_storage %}
+        renderLocalStoragePredictions();
+    {% endif %}
+});
+</script>
+{% endblock %}

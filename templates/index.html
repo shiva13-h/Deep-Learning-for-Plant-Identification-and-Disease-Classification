@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Home - AgriVision AI{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-75">
+            <div class="col-lg-6 text-center text-lg-start">
+                <h1 class="display-4 fw-bold text-success mb-4">
+                    Detect Plant Diseases with AI
+                </h1>
+                <p class="lead text-muted mb-4">
+                    Upload a photo of your plant's leaf and get instant disease detection 
+                    powered by advanced machine learning technology. Protect your crops 
+                    and maximize your harvest.
+                </p>
+                <a href="{{ url_for('upload') }}" class="btn btn-success btn-lg px-5 py-3 shadow">
+                    <i class="fas fa-camera me-2"></i>Start Detection
+                </a>
+            </div>
+            <div class="col-lg-6 text-center mt-5 mt-lg-0">
+                <div class="hero-image">
+                    <i class="fas fa-seedling display-1 text-success opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Why Choose AgriVision AI?</h2>
+            <p class="text-muted">Advanced technology for modern agriculture</p>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Feature 1: AI Powered -->
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-brain fa-3x text-success"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">AI Powered</h5>
+                        <p class="card-text text-muted">
+                            Leveraging deep learning models trained on thousands of plant images 
+                            for accurate disease identification.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 2: Plant Identification -->
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-leaf fa-3x text-success"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">Plant Identification</h5>
+                        <p class="card-text text-muted">
+                            Automatically identifies plant species from leaf images using 
+                            GPT-4o Vision AI with minimal token usage.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 3: High Accuracy -->
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-crosshairs fa-3x text-success"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">High Accuracy</h5>
+                        <p class="card-text text-muted">
+                            Achieve confidence scores up to 98% with our state-of-the-art 
+                            image recognition technology.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row g-4 mt-2">
+            <!-- Feature 4: Fast Detection -->
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-bolt fa-3x text-success"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">Fast Detection</h5>
+                        <p class="card-text text-muted">
+                            Get instant results within seconds. Quick diagnosis means 
+                            faster treatment and healthier crops.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 5: Comprehensive Coverage -->
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-database fa-3x text-success"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">38+ Diseases</h5>
+                        <p class="card-text text-muted">
+                            Covers 14 major plant species with 38 disease classifications 
+                            from apple to tomato crops.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 6: Expert Recommendations -->
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-user-md fa-3x text-success"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">Expert Guidance</h5>
+                        <p class="card-text text-muted">
+                            Receive detailed treatment plans, prevention strategies, and 
+                            recovery timelines for each diagnosis.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">How It Works</h2>
+            <p class="text-muted">Simple three-step process</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4 text-center">
+                <div class="step-number mb-3">
+                    <span class="badge bg-success rounded-circle p-3 fs-4">1</span>
+                </div>
+                <h5 class="fw-bold">Upload Image</h5>
+                <p class="text-muted">Take a clear photo of the affected plant leaf</p>
+            </div>
+            
+            <div class="col-md-4 text-center">
+                <div class="step-number mb-3">
+                    <span class="badge bg-success rounded-circle p-3 fs-4">2</span>
+                </div>
+                <h5 class="fw-bold">AI Analysis</h5>
+                <p class="text-muted">Our model analyzes the image for disease indicators</p>
+            </div>
+            
+            <div class="col-md-4 text-center">
+                <div class="step-number mb-3">
+                    <span class="badge bg-success rounded-circle p-3 fs-4">3</span>
+                </div>
+                <h5 class="fw-bold">Get Results</h5>
+                <p class="text-muted">Receive diagnosis with treatment recommendations</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="cta-section py-5 bg-success text-white">
+    <div class="container text-center">
+        <h3 class="fw-bold mb-3">Ready to Protect Your Plants?</h3>
+        <p class="lead mb-4">Start detecting diseases now</p>
+        <a href="{{ url_for('upload') }}" class="btn btn-light btn-lg px-5">
+            <i class="fas fa-arrow-right me-2"></i>Get Started
+        </a>
+    </div>
+</section>
+{% endblock %}
